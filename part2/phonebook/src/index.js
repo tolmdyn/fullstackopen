@@ -1,12 +1,14 @@
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import App from './App';
+import axios from 'axios'
+import './index.css'
 
-const persons = [{ name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }]
+const promise = axios.get('http://localhost:3001/persons')
 
-ReactDOM.render(
-  <App persons={persons}/>,
-  document.getElementById('root')
-);
+axios
+  .get('http://localhost:3001/persons')
+  .then(response => {
+    const persons = response.data
+  })
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)

@@ -1,5 +1,8 @@
 import React from 'react'
 import { useState } from 'react'
+import axios from 'axios'
+
+import personService from '../services/persons'
 
 const InputItem = ({text, value, handle}) => {
   return (
@@ -16,6 +19,7 @@ const InputItem = ({text, value, handle}) => {
 const PersonForm = (props) => {
   const persons = props.persons
   const setPersons = props.setPersons
+  const showNotifcationMessage = props.showNotifcationMessage
 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
@@ -23,19 +27,36 @@ const PersonForm = (props) => {
   const addPerson = (event) => {
       event.preventDefault()
 
-      if (containsName(newName)){
-        window.alert(`${newName} is already added to phonebook`);
-      } else {
-
       const personObject = {
         name: newName,
-        number: newNumber,
-        id: persons.length + 1
+        number: newNumber
       }
 
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      if (containsName(newName)){
+        if (window.confirm(`${newName} already in phonebook, overwrite?`)){
+          const id = persons.find(p => p.name === newName).id
+          console.log(id);
+          personService
+            .update(id, personObject)
+            .then(response => {
+              setPersons(persons.filter(p => p.id !== id).concat(response))
+              setNewName('')
+              setNewNumber('')
+              showNotifcationMessage(`${newName} modified`, 'message')
+            })
+            .catch(error =>{
+              showNotifcationMessage(`${newName} has already been removed from the server`, 'error')
+            })
+        }
+      } else {
+        personService
+          .create(personObject)
+          .then(response => {
+            setPersons(persons.concat(response))
+            setNewName('')
+            setNewNumber('')
+            showNotifcationMessage(`${newName} added`, 'message')
+          })
     }
   }
 
