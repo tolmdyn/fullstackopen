@@ -1,6 +1,5 @@
 import React from 'react'
 import { useState } from 'react'
-import axios from 'axios'
 
 import personService from '../services/persons'
 
@@ -60,16 +59,12 @@ const PersonForm = (props) => {
     }
   }
 
-  const isPerson = (p1) => (p2) => p1.name === p2.name
+  //const isPerson = (p1) => (p2) => p1.name === p2.name
 
   const isName = (name) => (person) => name === person.name
 
   const containsName = (name) => {
     return persons.some(isName(name));
-  }
-
-  const containsPerson = (person) => {
-    return persons.some(isPerson(person));
   }
 
   const handleMaker = (f) => (event) => {
