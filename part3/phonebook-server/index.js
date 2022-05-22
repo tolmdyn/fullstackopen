@@ -4,17 +4,9 @@ const cors = require('cors')
 
 const app = express()
 
-//app.use(morgan('tiny'))
-
-
-morgan.token('content', function (req, res) {
-  if (req.method == 'POST'){
-    return JSON.stringify(req.body)
-  }
-})
-
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'))
+app.use(morgan('tiny'))
 app.use(express.json())
+app.use(express.static('build'))
 app.use(cors())
 
 let data = [
