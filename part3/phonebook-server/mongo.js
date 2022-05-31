@@ -19,7 +19,7 @@ const personSchema = new mongoose.Schema({
 
 const Person = mongoose.model('Person', personSchema)
 
-if (process.argv.length == 3){
+if (process.argv.length === 3){
   mongoose.connect(url)
 
   Person.find({}).then(result => {
@@ -29,23 +29,23 @@ if (process.argv.length == 3){
     mongoose.connection.close()
     process.exit(1)
   })
-} else if (process.argv.length == 5) {
+} else if (process.argv.length === 5) {
   mongoose.connect(url)
   const name = process.argv[3]
   const number = process.argv[4]
 
-  console.log(name, number);
+  console.log(name, number)
 
   const person = new Person({
     name,
     number
   })
 
-  person.save().then(result => {
+  person.save().then(() => {
     console.log('person saved!')
     mongoose.connection.close()
     process.exit(1)
   })
 } else {
-    console.log('Please provide correct number of arguments: <password> OR <password> <name> <number>')
+  console.log('Please provide correct number of arguments: <password> OR <password> <name> <number>')
 }

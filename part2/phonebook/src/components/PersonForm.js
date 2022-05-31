@@ -56,6 +56,10 @@ const PersonForm = (props) => {
             setNewNumber('')
             showNotifcationMessage(`${newName} added`, 'message')
           })
+          .catch(error => {
+            console.log(error.response.data.error)
+            showNotifcationMessage(`${error.response.data.error}`, 'error')
+          })
     }
   }
 
