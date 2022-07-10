@@ -5,7 +5,12 @@ const testList = require("./testList")
 
 const Blog = require('../models/blog')
 
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
+
 const api = supertest(app)
+
+const helper = require('./test_helper')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -129,6 +134,81 @@ describe('update of a blog entry', () => {
       //const blogs = response.map(blog => blog.toJSON())
       console.log(response);
       expect(response).toHaveProperty("title", "Switcheroo")
+  })
+})
+
+describe('testing user functions', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', name:'Joe Bloggs', passwordHash })
+
+    await user.save()
+  })
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'root',
+      name: 'Bart Simpson',
+      password: 'salainen',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('username must be unique')
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toEqual(usersAtStart)
+  })
+  
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'jimmy',
+      name: 'Jim Jones',
+      password: 'eureka',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(u => u.username)
+    expect(usernames).toContain(newUser.username)
+  })
+
+  test('creation fails with proper statuscode and message if username incorrect format', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'j',
+      name: 'Jeff',
+      password: 'lazyman',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    expect(result.body.error).toContain('is shorter than the minimum allowed length')
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toEqual(usersAtStart)
   })
 })
 
