@@ -8,6 +8,9 @@ const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
+
 logger.info('connecting to', config.MONGODB_URI)
 
 app.connectToDatabase = async () => {
@@ -30,6 +33,10 @@ app.connectToDatabase = async () => {
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
+
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
+
 app.use(middleware.requestLogger)
 
 app.use('/api/notes', notesRouter)
