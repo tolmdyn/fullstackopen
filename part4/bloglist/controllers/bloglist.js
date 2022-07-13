@@ -29,13 +29,16 @@ blogRouter.get("/:id", async (request, response) => {
 blogRouter.post("/", async (request, response) => {
   const body = request.body
   
-  const token = getTokenFrom(request)
-  const decodedToken = jwt.verify(token, process.env.SECRET)
+  //const token = getTokenFrom(request)
+  //const decodedToken = jwt.verify(token, process.env.SECRET)
+  
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
+
   const user = await User.findById(decodedToken.id)
-  //const user = await User.findOne()
 
   const blog = new Blog({
     title: body.title,
@@ -54,7 +57,25 @@ blogRouter.post("/", async (request, response) => {
 })
 
 blogRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndRemove(request.params.id)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const user = await User.findById(decodedToken.id)
+  const blog = await Blog.findById(request.params.id)
+
+  //console.log("blog user", blog.user.toString())
+  //console.log("user user", user.id.toString())
+
+  if (blog.user.toString() === user.id.toString()){
+    await blog.remove()
+  } else {
+    return response.status(401).json({ error: 'wrong user token' })
+  }
+    
+  //await Blog.findByIdAndRemove(request.params.id)
   response.status(204).end()
 })
 
